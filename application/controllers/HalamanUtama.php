@@ -80,7 +80,7 @@ class HalamanUtama extends MY_Controller
     public function cek_token_sso()
     {
         $token = $this->input->cookie('sso_token');
-        $cookie_domain = $this->session->userdata('sso_server');
+        $cookie_domain = $this->config->item('sso_server');
         $sso_api = $cookie_domain . "api/cek_token?sso_token={$token}";
         $response = file_get_contents($sso_api);
         $data = json_decode($response, true);
