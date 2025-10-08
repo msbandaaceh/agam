@@ -45,11 +45,28 @@ function info(pesan) {
 
 function loadPage(page) {
     cekToken();
-    $('#app').html('<div class="page-wrapper"><div class="page-content"><div class="text-center p-4">Memuat...</div></div></div>');
+    $('#app').html(`
+        <div class="page-wrapper">
+            <div class="page-content">
+                <div class="text-center p-4">
+                    <div class="spinner-border text-primary" role="status"></div>
+                </div>
+                <div class="text-center">
+                    <span>Memuat Halaman... Harap Tunggu Sebentar</span>
+                </div>
+            </div>
+        </div>
+    `);
     $.get("halamanutama/page/" + page, function (data) {
         $('#app').html(data);
     }).fail(function () {
-        $('#app').html('<div class="text-danger">Halaman tidak ditemukan.</div>');
+        $('#app').html(`
+            <div class="page-wrapper">
+                <div class="page-content">
+                    <div class="text-center p-4">Halaman tidak ditemukan.</div>
+                </div>
+            </div>
+        `);
     });
 }
 
