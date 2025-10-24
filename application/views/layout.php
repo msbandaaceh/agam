@@ -250,6 +250,7 @@
             // Navigasi SPA
             $('[data-page]').on('click', function (e) {
                 e.preventDefault();
+                $('.wrapper').removeClass('toggled');
                 let page = $(this).data('page');
                 loadPage(page);
             });

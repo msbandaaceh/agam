@@ -177,6 +177,9 @@ class HalamanLaporan extends MY_Controller
         if ($dok == 'undangan') {
             $sifat = $this->input->post('sifat');
             $lampiran = $this->input->post('lampiran');
+            if ($lampiran == null) {
+                $lampiran = '-99';
+            }
             $url = site_url('halamanlaporan/get_dokumen_undangan_pdf/' . $id . '/' . $sifat . '/' . $lampiran . '/' . $ttd);
             echo json_encode(['success' => 1, 'message' => 'Download Undangan Berhasil', 'url' => $url]);
             return;
@@ -212,7 +215,7 @@ class HalamanLaporan extends MY_Controller
         $pejabat = $query->row()->nama_penandatangan;
         $jabatan = $query->row()->jabatan_penandatangan;
 
-        if (!$lampiran)
+        if ($lampiran == '-99')
             $lampiran = '-';
 
         $data = array(

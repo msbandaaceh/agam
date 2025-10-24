@@ -85,6 +85,7 @@ class MY_Controller extends CI_Controller
         }
 
         $this->session->set_userdata('ip_satker', $this->get_config_value('34'));
+        $this->session->set_userdata('nama_pengadilan', $this->get_config_value('4'));
         $this->session->set_userdata('token_now', $token_presensi);
         $this->session->set_userdata('logged_in', TRUE);
     }
