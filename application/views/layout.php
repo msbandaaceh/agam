@@ -98,6 +98,26 @@
                         <div class="menu-title">Dokumen Rapat</div>
                     </a>
                 </li>
+
+                <li class="menu-label">Panduan & Dokumentasi</li>
+                <li>
+                    <a href="javascript:;" data-page="panduan">
+                        <div class="parent-icon"><i class='bx bx-book-open'></i>
+                        </div>
+                        <div class="menu-title">Panduan Penggunaan</div>
+                    </a>
+                </li>
+                <?php
+                if (in_array($peran, ['admin'])) {
+                    ?>
+                    <li>
+                        <a href="javascript:;" data-page="dokumentasi_teknis">
+                            <div class="parent-icon"><i class='bx bx-code-alt'></i>
+                            </div>
+                            <div class="menu-title">Dokumentasi Teknis</div>
+                        </a>
+                    </li>
+                <?php } ?>
             </ul>
         </div>
 

@@ -18,7 +18,9 @@ class HalamanUtama extends MY_Controller
             'dashboard',
             'agenda_rapat',
             'presensi_rapat',
-            'dokumen_rapat'
+            'dokumen_rapat',
+            'panduan',
+            'dokumentasi_teknis'
         ];
 
         if (in_array($halaman, $allowed)) {
