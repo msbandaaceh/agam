@@ -5,8 +5,85 @@ class HalamanUtama extends MY_Controller
     public function index()
     {
         #die(var_dump($this->session->all_userdata()));
-        $data['peran'] = $this->session->userdata('peran');
+        $peran = $this->session->userdata('peran');
+        $userid = $this->session->userdata('userid');
+        
+        $data['peran'] = $peran;
         $data['page'] = 'dashboard';
+        
+        // Data rapat hari ini
+        $data['rapat_hari_ini'] = $this->model->get_seleksi_array('register_rapat', [
+            'tanggal' => date('Y-m-d'),
+            'hapus' => '0'
+        ], ['mulai' => 'ASC'])->result();
+        
+        // Data rapat mendatang (7 hari ke depan)
+        $tanggal_mendatang = date('Y-m-d', strtotime('+7 days'));
+        $this->db->select('*');
+        $this->db->from('register_rapat');
+        $this->db->where('tanggal >=', date('Y-m-d'));
+        $this->db->where('tanggal <=', $tanggal_mendatang);
+        $this->db->where('hapus', '0');
+        $this->db->order_by('tanggal', 'ASC');
+        $this->db->order_by('mulai', 'ASC');
+        $this->db->limit(5);
+        $data['rapat_mendatang'] = $this->db->get()->result();
+        
+        // Statistik rapat bulan ini
+        $bulan_ini = date('Y-m');
+        $this->db->select('COUNT(*) as total_rapat');
+        $this->db->from('register_rapat');
+        $this->db->where("DATE_FORMAT(tanggal, '%Y-%m') = '{$bulan_ini}'", null, false);
+        $this->db->where('hapus', '0');
+        $stat_rapat = $this->db->get()->row();
+        $data['statistik_bulan']['total_rapat'] = $stat_rapat->total_rapat ?? 0;
+        
+        // Total presensi bulan ini
+        $this->db->select('COUNT(DISTINCT p.idrapat) as rapat_dengan_presensi, COUNT(p.id) as total_presensi');
+        $this->db->from('register_rapat r');
+        $this->db->join('register_presensi_rapat p', 'r.id = p.idrapat', 'left');
+        $this->db->where("DATE_FORMAT(r.tanggal, '%Y-%m') = '{$bulan_ini}'", null, false);
+        $this->db->where('r.hapus', '0');
+        $this->db->where('p.hapus', '0');
+        $stat_presensi = $this->db->get()->row();
+        $data['statistik_bulan']['rapat_dengan_presensi'] = $stat_presensi->rapat_dengan_presensi ?? 0;
+        $data['statistik_bulan']['total_presensi'] = $stat_presensi->total_presensi ?? 0;
+        
+        // Rapat terbaru (5 terakhir)
+        $this->db->select('r.*, COUNT(p.id) as jumlah_presensi');
+        $this->db->from('register_rapat r');
+        $this->db->join('register_presensi_rapat p', 'r.id = p.idrapat AND p.hapus = "0"', 'left');
+        $this->db->where('r.hapus', '0');
+        $this->db->group_by('r.id');
+        $this->db->order_by('r.tanggal', 'DESC');
+        $this->db->order_by('r.created_on', 'DESC');
+        $this->db->limit(5);
+        $data['rapat_terbaru'] = $this->db->get()->result();
+        
+        // Tugas sebagai notulis atau dokumenter
+        $this->db->select('*');
+        $this->db->from('register_rapat');
+        $this->db->where('(notulis = "' . $userid . '" OR dokumenter = "' . $userid . '")');
+        $this->db->where('tanggal >=', date('Y-m-d'));
+        $this->db->where('hapus', '0');
+        $this->db->order_by('tanggal', 'ASC');
+        $this->db->order_by('mulai', 'ASC');
+        $data['tugas_rapat'] = $this->db->get()->result();
+        
+        // Cek presensi hari ini
+        $data['presensi_hari_ini'] = [];
+        if (!empty($data['rapat_hari_ini'])) {
+            foreach ($data['rapat_hari_ini'] as $rapat) {
+                $cek_presensi = $this->model->get_seleksi_array('register_presensi_rapat', [
+                    'idrapat' => $rapat->id,
+                    'userid' => $userid,
+                    'hapus' => '0'
+                ]);
+                if ($cek_presensi->num_rows() > 0) {
+                    $data['presensi_hari_ini'][$rapat->id] = $cek_presensi->row();
+                }
+            }
+        }
 
         $this->load->view('layout', $data);
     }
@@ -24,8 +101,88 @@ class HalamanUtama extends MY_Controller
         ];
 
         if (in_array($halaman, $allowed)) {
-            $data['peran'] = $this->session->userdata('peran');
+            $peran = $this->session->userdata('peran');
+            $userid = $this->session->userdata('userid');
+            
+            $data['peran'] = $peran;
             $data['page'] = $halaman;
+            
+            // Jika halaman dashboard, siapkan data yang sama seperti index()
+            if ($halaman == 'dashboard') {
+                // Data rapat hari ini
+                $data['rapat_hari_ini'] = $this->model->get_seleksi_array('register_rapat', [
+                    'tanggal' => date('Y-m-d'),
+                    'hapus' => '0'
+                ], ['mulai' => 'ASC'])->result();
+                
+                // Data rapat mendatang (7 hari ke depan)
+                $tanggal_mendatang = date('Y-m-d', strtotime('+7 days'));
+                $this->db->select('*');
+                $this->db->from('register_rapat');
+                $this->db->where('tanggal >=', date('Y-m-d'));
+                $this->db->where('tanggal <=', $tanggal_mendatang);
+                $this->db->where('hapus', '0');
+                $this->db->order_by('tanggal', 'ASC');
+                $this->db->order_by('mulai', 'ASC');
+                $this->db->limit(5);
+                $data['rapat_mendatang'] = $this->db->get()->result();
+                
+                // Statistik rapat bulan ini
+                $bulan_ini = date('Y-m');
+                $this->db->select('COUNT(*) as total_rapat');
+                $this->db->from('register_rapat');
+                $this->db->where("DATE_FORMAT(tanggal, '%Y-%m') = '{$bulan_ini}'", null, false);
+                $this->db->where('hapus', '0');
+                $stat_rapat = $this->db->get()->row();
+                $data['statistik_bulan']['total_rapat'] = $stat_rapat->total_rapat ?? 0;
+                
+                // Total presensi bulan ini
+                $this->db->select('COUNT(DISTINCT p.idrapat) as rapat_dengan_presensi, COUNT(p.id) as total_presensi');
+                $this->db->from('register_rapat r');
+                $this->db->join('register_presensi_rapat p', 'r.id = p.idrapat', 'left');
+                $this->db->where("DATE_FORMAT(r.tanggal, '%Y-%m') = '{$bulan_ini}'", null, false);
+                $this->db->where('r.hapus', '0');
+                $this->db->where('p.hapus', '0');
+                $stat_presensi = $this->db->get()->row();
+                $data['statistik_bulan']['rapat_dengan_presensi'] = $stat_presensi->rapat_dengan_presensi ?? 0;
+                $data['statistik_bulan']['total_presensi'] = $stat_presensi->total_presensi ?? 0;
+                
+                // Rapat terbaru (5 terakhir)
+                $this->db->select('r.*, COUNT(p.id) as jumlah_presensi');
+                $this->db->from('register_rapat r');
+                $this->db->join('register_presensi_rapat p', 'r.id = p.idrapat AND p.hapus = "0"', 'left');
+                $this->db->where('r.hapus', '0');
+                $this->db->group_by('r.id');
+                $this->db->order_by('r.tanggal', 'DESC');
+                $this->db->order_by('r.created_on', 'DESC');
+                $this->db->limit(5);
+                $data['rapat_terbaru'] = $this->db->get()->result();
+                
+                // Tugas sebagai notulis atau dokumenter
+                $this->db->select('*');
+                $this->db->from('register_rapat');
+                $this->db->where('(notulis = "' . $userid . '" OR dokumenter = "' . $userid . '")');
+                $this->db->where('tanggal >=', date('Y-m-d'));
+                $this->db->where('hapus', '0');
+                $this->db->order_by('tanggal', 'ASC');
+                $this->db->order_by('mulai', 'ASC');
+                $data['tugas_rapat'] = $this->db->get()->result();
+                
+                // Cek presensi hari ini
+                $data['presensi_hari_ini'] = [];
+                if (!empty($data['rapat_hari_ini'])) {
+                    foreach ($data['rapat_hari_ini'] as $rapat) {
+                        $cek_presensi = $this->model->get_seleksi_array('register_presensi_rapat', [
+                            'idrapat' => $rapat->id,
+                            'userid' => $userid,
+                            'hapus' => '0'
+                        ]);
+                        if ($cek_presensi->num_rows() > 0) {
+                            $data['presensi_hari_ini'][$rapat->id] = $cek_presensi->row();
+                        }
+                    }
+                }
+            }
 
             $this->load->view($halaman, $data);
         } else {
