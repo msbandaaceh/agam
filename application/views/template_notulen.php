@@ -15,8 +15,8 @@
         }
 
         body {
-            font-family: 'BookmanOldStyle', serif;
-            font-size: 12pt;
+            font-family: 'Bookman Old Style', serif;
+            font-size: 12px;
         }
 
         div {
@@ -45,7 +45,7 @@
         </tr>
     </table>
     <br />
-    <table style="border:none; width:100%; font-family: 'BookmanOldStyle', serif; font-size: 12pt;">
+    <table style="border:none; width:100%; font-family: 'Bookman Old Style', serif; font-size: 12px;">
         <tr>
             <td style="text-align:center; border:none;" colspan=3>
                 <h3>NOTULA</h3>
@@ -111,7 +111,7 @@
                 Notulis,
             </td>
             <td style="width: 50%; border: none;">
-                <?= ucwords(strtolower($jabatan)) ?> Mahkamah Syar’iyah Banda Aceh
+                <?= ucwords(strtolower($jabatan)) ?>
             </td>
         </tr>
         <?php if ($qr_code_pejabat) {

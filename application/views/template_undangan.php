@@ -10,8 +10,8 @@
         }
 
         body {
-            font-family: 'BookmanOldStyle', serif;
-            font-size: 12pt;
+            font-family: 'Arial', sans-serif;
+            font-size: 12px;
         }
 
         div {
@@ -29,7 +29,7 @@
         </tr>
     </table>
     <br />
-    <table style="border:none; width:100%; font-family: 'BookmanOldStyle', serif; font-size: 12pt;">
+    <table style="border:none; width:100%;">
         <tr>
             <td style="border:none;width:12%;">Nomor</td>
             <td style="border:none;width:2%;">:</td>
@@ -104,13 +104,13 @@
     <p style="text-indent: 2em; text-align: justify;">
         Demikian undangan ini disampaikan untuk dilaksanakan.
     </p>
-    <table style="width: 100%; border: none; font-family: 'BookmanOldStyle', serif; font-size: 12pt;">
+    <table style="width: 100%; border: none; ">
         <tr>
             <td style="width: 70%; border: none;"></td>
             <td style="width: 30%; border: none;">
-                <?= ucwords(strtolower($jabatan)) ?>
+                <?= ucwords(strtolower($jabatan)) ?><br>
                 <?php if ($qr_code): ?>
-                    <img src="<?= $qr_code ?>" alt="<?= $nama ?>">
+                    <img src="<?= $qr_code ?>" alt="<?= $nama ?>"><br>
                 <?php else: ?>
                     <br><br><br><br>
                 <?php endif; ?>

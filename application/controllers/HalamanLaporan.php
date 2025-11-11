@@ -243,10 +243,10 @@ class HalamanLaporan extends MY_Controller
                 ->data($link)
                 ->encoding(new Encoding('UTF-8'))
                 ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-                ->size(120)
-                ->margin(10)
+                ->size(100)
+                ->margin(0)
                 ->logoPath($logoPath)
-                ->logoResizeToWidth(15)
+                ->logoResizeToWidth(20)
                 ->build();
 
             $data['qr_code'] = $result->getDataUri();
@@ -315,10 +315,10 @@ class HalamanLaporan extends MY_Controller
                 ->data($link)
                 ->encoding(new Encoding('UTF-8'))
                 ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-                ->size(120)
-                ->margin(10)
+                ->size(100)
+                ->margin(0)
                 ->logoPath($logoPath)
-                ->logoResizeToWidth(15)
+                ->logoResizeToWidth(20)
                 ->build();
 
             $data['qr_code_pejabat'] = $result->getDataUri();
@@ -330,10 +330,10 @@ class HalamanLaporan extends MY_Controller
                 ->data($link1)
                 ->encoding(new Encoding('UTF-8'))
                 ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-                ->size(120)
-                ->margin(10)
+                ->size(100)
+                ->margin(0)
                 ->logoPath($logoPath)
-                ->logoResizeToWidth(15)
+                ->logoResizeToWidth(20)
                 ->build();
 
             $data['qr_code_notulen'] = $result->getDataUri();
@@ -387,10 +387,10 @@ class HalamanLaporan extends MY_Controller
                 ->data($link)
                 ->encoding(new Encoding('UTF-8'))
                 ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
-                ->size(120)
-                ->margin(10)
+                ->size(100)
+                ->margin(0)
                 ->logoPath($logoPath)
-                ->logoResizeToWidth(15)
+                ->logoResizeToWidth(20)
                 ->build();
 
             $data['qr_code'] = $result->getDataUri();

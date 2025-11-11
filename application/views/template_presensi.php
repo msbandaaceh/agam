@@ -15,8 +15,8 @@
         }
 
         body {
-            font-family: 'BookmanOldStyle', serif;
-            font-size: 12pt;
+            font-family: 'Bookman Old Style', serif;
+            font-size: 12px;
         }
 
         div {
@@ -76,7 +76,7 @@
         </tr>
     </table>
     <br />
-    <table style="border:none; width:100%; font-family: 'BookmanOldStyle', serif; font-size: 12pt;">
+    <table style="border:none; width:100%; font-family: 'Bookman Old Style', serif; font-size: 12px;">
         <tr>
             <td style="text-align:center; border:none;" colspan=3>
                 <h3>DAFTAR HADIR</h3>
@@ -117,7 +117,7 @@
 
     <div style="text-align: justify; margin-bottom: 5px;">
         <table id="tabel1" class="table table-bordered table-hover"
-            style="font-family: 'BookmanOldStyle', serif; font-size: 12pt;">
+            style="font-family: 'Bookman Old Style', serif; font-size: 12px;">
             <thead>
                 <tr>
                     <th class="text-center" style="width: 1%">NO</th>
@@ -157,13 +157,13 @@
         </table>
     </div>
 
-    <table style="width: 100%; border: none; font-family: 'BookmanOldStyle', serif; font-size: 12pt;">
+    <table style="width: 100%; border: none; font-family: 'Bookman Old Style', serif; font-size: 12px;">
         <tr>
             <td style="width: 70%; border: none;"></td>
             <td style="width: 30%; border: none;">
-                <?= ucwords(strtolower($jabatan)) ?>
+                <?= ucwords(strtolower($jabatan)) ?><br>
                 <?php if ($qr_code): ?>
-                    <img src="<?= $qr_code ?>" alt="<?= $nama ?>">
+                    <img src="<?= $qr_code ?>" alt="<?= $nama ?>"><br>
                 <?php else: ?>
                     <br><br><br><br>
                 <?php endif; ?>

@@ -1,0 +1,4 @@
+# Folder ini untuk menyimpan file font sebelum diinstall ke dompdf
+# File font (.ttf) tidak di-commit ke repository karena ukuran besar
+# Copy file font ke folder ini sebelum menjalankan install_fonts.php
+
