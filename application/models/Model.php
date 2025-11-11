@@ -156,6 +156,7 @@ class Model extends CI_Model
             $dataRapat = array(
                 "tanggal" => $data['tgl'],
                 "no_surat" => $data['no'],
+                "tgl_undangan" => $data['tgl_undangan'],
                 "penandatangan" => $data['penandatangan'],
                 "mulai" => $data['mulai'],
                 "selesai" => $data['selesai'],
@@ -173,6 +174,7 @@ class Model extends CI_Model
             $dataRapat = array(
                 "tanggal" => $data['tgl'],
                 "no_surat" => $data['no'],
+                "tgl_undangan" => $data['tgl_undangan'],
                 "penandatangan" => $data['penandatangan'],
                 "mulai" => $data['mulai'],
                 "selesai" => $data['selesai'],

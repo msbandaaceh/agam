@@ -58,8 +58,14 @@
                 </div>
                 <div class="row mb-3">
                     <div class="col">
+                        <label for="tgl" class="form-label">TANGGAL UNDANGAN</label><code> *</code>
+                        <input type="text" id="tgl_undangan" name="tgl_undangan" class="form-control" placeholder="Pilih Tanggal Undangan..">
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col">
                         <label for="tgl" class="form-label">TANGGAL RAPAT</label><code> *</code>
-                        <input type="text" id="tgl" name="tgl" class="form-control" placeholder="Pilih Tanggal">
+                        <input type="text" id="tgl" name="tgl" class="form-control" placeholder="Pilih Tanggal Rapat..">
                     </div>
                 </div>
                 <div class="row mb-3">
@@ -257,7 +263,12 @@
     });
 
     document.getElementById('btn-edit').addEventListener('click', function () {
-        tglPicker.set('clickOpens', true);
+        if (tglPicker) {
+            tglPicker.set('clickOpens', true);
+        }
+        if (tglUndanganPicker) {
+            tglUndanganPicker.set('clickOpens', true);
+        }
         $('#pengundang, #notulis, #dokumenter').off('select2:opening', blockOpening);
         $('#mulai, #selesai').prop('disabled', false);
         document.getElementById('notif_').style.display = "block";

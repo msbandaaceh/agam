@@ -6,7 +6,8 @@ var token = config.tokenNow;
 var token_cookies = config.tokenCookies;
 var peran = config.peran;
 var userid = config.userid;
-let tglPicker; // simpan global
+let tglPicker; // simpan global untuk tanggal rapat
+let tglUndanganPicker; // simpan global untuk tanggal undangan
 
 function notifikasi(pesan, result) {
     let icon;
@@ -952,7 +953,15 @@ function loadRapat(id, isDetail = false) {
     }, function (response) {
         var json = jQuery.parseJSON(response);
         if (json.st == 1) {
+            // Destroy existing flatpickr instances jika ada
+            if (tglPicker) {
+                tglPicker.destroy();
+            }
+            if (tglUndanganPicker) {
+                tglUndanganPicker.destroy();
+            }
 
+            // Konfigurasi flatpickr untuk tanggal rapat
             tglPicker = flatpickr("#tgl", {
                 dateFormat: "Y-m-d", // format yg dikirim ke server
                 altInput: true,
@@ -979,10 +988,39 @@ function loadRapat(id, isDetail = false) {
                 ]
             });
 
+            // Konfigurasi flatpickr untuk tanggal undangan
+            tglUndanganPicker = flatpickr("#tgl_undangan", {
+                dateFormat: "Y-m-d", // format yg dikirim ke server
+                altInput: true,
+                disableMobile: true,
+                altFormat: "d F Y", // format tampilan
+                locale: {
+                    firstDayOfWeek: 0,
+                    weekdays: {
+                        shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                        longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                    },
+                    months: {
+                        shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                        longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                    },
+                },
+                disable: [
+                    function (date) {
+                        // getDay() -> 0 = Minggu, 6 = Sabtu
+                        return (date.getDay() === 0 || date.getDay() === 6);
+                    }
+                ]
+            });
+
+            // Reset semua field
             $("#id").val('');
             $("#judul_").html('');
             $("#peserta").val('');
             tglPicker.clear();
+            tglUndanganPicker.clear();
             $("#mulai").val('');
             $("#selesai").val('');
             $("#tempat").val('');
@@ -992,12 +1030,21 @@ function loadRapat(id, isDetail = false) {
             $("#dokumenter_").html('');
             $("#no").val('');
 
+            // Set nilai dari response
             $("#id").val(json.id);
             $("#judul_").append(json.judul);
             $("#peserta").val(json.peserta);
+            
+            // Set tanggal rapat
             if (json.tgl) {
                 tglPicker.setDate(json.tgl, true, "Y-m-d");
             }
+
+            // Set tanggal undangan
+            if (json.tgl_undangan) {
+                tglUndanganPicker.setDate(json.tgl_undangan, true, "Y-m-d");
+            }
+            
             $("#mulai").val(json.mulai);
             $("#selesai").val(json.selesai);
             $("#tempat").val(json.tempat);
@@ -1016,8 +1063,8 @@ function loadRapat(id, isDetail = false) {
 
             // kalau mode detail, lock input
             if (isDetail) {
-
                 tglPicker.set('clickOpens', false);
+                tglUndanganPicker.set('clickOpens', false);
                 $('#pengundang, #notulis, #dokumenter').on('select2:opening', blockOpening);
                 $('#mulai, #selesai').prop('disabled', true);
                 if (['operator', 'admin'].includes(peran)) {

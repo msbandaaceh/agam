@@ -45,6 +45,7 @@ class HalamanAgendaRapat extends MY_Controller
         $peserta = "";
         $no = "";
         $tgl = "";
+        $tgl_undangan = "";
 
         if ($id == '-1') {
             $judul = "TAMBAH DATA AGENDA RAPAT";
@@ -64,6 +65,7 @@ class HalamanAgendaRapat extends MY_Controller
             $peserta = $queryRapat->row()->peserta;
             $no = $queryRapat->row()->no_surat;
             $tgl = $queryRapat->row()->tanggal;
+            $tgl_undangan = $queryRapat->row()->tgl_undangan;
             $pengundang = form_dropdown('pengundang', $pegawai, $pengundang1, 'class="form-control select2" id="pengundang"');
             $notulis = form_dropdown('notulis', $pegawai, $notulis1, 'class="form-control select2" id="notulis"');
             $dokumenter = form_dropdown('dokumenter', $pegawai, $dokumenter1, 'class="form-control select2" id="dokumenter"');
@@ -75,6 +77,7 @@ class HalamanAgendaRapat extends MY_Controller
                 'id' => $id,
                 'no' => $no,
                 'tgl' => $tgl,
+                'tgl_undangan' => $tgl_undangan,
                 'judul' => $judul,
                 'mulai' => $mulai,
                 'selesai' => $selesai,
@@ -128,6 +131,7 @@ class HalamanAgendaRapat extends MY_Controller
 
     public function simpan_rapat()
     {
+        $this->form_validation->set_rules('tgl_undangan', 'Tanggal Undangan Rapat', 'trim|required');
         $this->form_validation->set_rules('tgl', 'Tanggal Agenda Rapat', 'trim|required');
         $this->form_validation->set_rules('pengundang', 'Pengundang Agenda Rapat', 'trim|required');
         $this->form_validation->set_rules('mulai', 'Tanggal Awal', 'trim|required');
@@ -146,6 +150,7 @@ class HalamanAgendaRapat extends MY_Controller
         $data = [
             'id' => $this->input->post('id'),
             'tgl' => $this->input->post('tgl'),
+            'tgl_undangan' => $this->input->post('tgl_undangan'),
             'penandatangan' => $this->input->post('pengundang'),
             'mulai' => $this->input->post('mulai'),
             'selesai' => $this->input->post('selesai'),
