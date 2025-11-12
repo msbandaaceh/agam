@@ -36,7 +36,7 @@
             <td style="border:none;width:46%;"><?= $nomor ?></td>
             </td>
             <td style="border:none;width:40%;text-align:right" rowspan="3" valign="top">Banda Aceh,
-                <?= $tanggal ?>
+                <?= $tgl_undangan ?>
             </td>
         </tr>
         <tr>

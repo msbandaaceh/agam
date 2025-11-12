@@ -174,7 +174,7 @@
 
     <div id="footer">
         <em>Generate dari
-            <?= $this->session->userdata('nama_app') . ' ' . ucwords(strtolower($this->session->userdata('nama_pengadilan'))) ?>
+            <?= $this->session->userdata('nama_client_app') . ' ' . ucwords(strtolower($this->session->userdata('nama_pengadilan'))) ?>
             - <?= date('Y-m-d H:i:s') ?></em>
     </div>
 </body>

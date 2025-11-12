@@ -206,6 +206,7 @@ class HalamanLaporan extends MY_Controller
         $date = new DateTime($query->row()->created_on);
         $tanggal = $this->tanggalhelper->konversiTanggal($date->format('Y-m-d'));
         $agenda = $query->row()->agenda;
+        $tgl_undangan = $this->tanggalhelper->konversiTanggal($query->row()->tgl_undangan);
         $tanggal_agenda = $this->tanggalhelper->convertDayDate($query->row()->tanggal);
         $mulai = $query->row()->mulai;
         $selesai = $query->row()->selesai;
@@ -224,6 +225,7 @@ class HalamanLaporan extends MY_Controller
             'lampiran' => $lampiran,
             'tanggal' => $tanggal,
             'agenda' => $agenda,
+            'tgl_undangan' => $tgl_undangan,
             'tanggal_agenda' => $tanggal_agenda,
             'mulai' => $mulai,
             'selesai' => $selesai,
@@ -271,6 +273,7 @@ class HalamanLaporan extends MY_Controller
         $nomor = $query->row()->no_surat;
         $date = new DateTime($query->row()->created_on);
         $tanggal = $this->tanggalhelper->konversiTanggal($date->format('Y-m-d'));
+        $tgl_undangan = $this->tanggalhelper->konversiTanggal($query->row()->tgl_undangan);
         $tanggal_agenda = $this->tanggalhelper->convertDayDate($query->row()->tanggal);
         $mulai = $query->row()->mulai;
         $agenda = $query->row()->agenda;
@@ -291,6 +294,7 @@ class HalamanLaporan extends MY_Controller
             'nomor' => $nomor,
             'tanggal' => $tanggal,
             'agenda' => $agenda,
+            'tgl_undangan' => $tgl_undangan,
             'tanggal_agenda' => $tanggal_agenda,
             'mulai' => $mulai,
             'selesai' => $selesai,

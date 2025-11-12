@@ -56,7 +56,7 @@
             <td style="border:none;width:2%;" class="notulen">:</td>
             <td style="border:none;width:78%;text-align: justify;" class="notulen">Undangan
                 <?= ucwords(strtolower($jabatan)) . ' ' . ucwords(strtolower($this->session->userdata('nama_pengadilan'))) ?>
-                Nomor : <?= $nomor ?> tanggal <?= $tanggal ?>
+                Nomor : <?= $nomor ?> tanggal <?= $tgl_undangan ?>
             </td>
         </tr>
         <tr>
@@ -142,7 +142,7 @@
 
     <div id="footer">
         <em>Generate dari
-            <?= $this->session->userdata('nama_app') . ' ' . ucwords(strtolower($this->session->userdata('nama_pengadilan'))) ?>
+            <?= $this->session->userdata('nama_client_app') . ' ' . ucwords(strtolower($this->session->userdata('nama_pengadilan'))) ?>
             - <?= date('Y-m-d H:i:s') ?></em>
     </div>
 
