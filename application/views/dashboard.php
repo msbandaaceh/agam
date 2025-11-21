@@ -1,4 +1,4 @@
-<?php 
+<?php
 // Inisialisasi default untuk mencegah error
 if (!isset($rapat_hari_ini)) {
     $rapat_hari_ini = [];
@@ -36,7 +36,23 @@ if (!isset($presensi_hari_ini)) {
         </div>
         <h6 class="mb-0 text-uppercase">Beranda</h6>
         <hr />
-
+        <!-- Tombol Presensi Rapat -->
+        <?php if ($this->session->userdata('agenda_rapat') == 1 && !empty($rapat_hari_ini)) { ?>
+            <div class="row">
+                <div class="col">
+                    <a href="javascript:;" class="card bg-gradient-cosmic" id="presensi">
+                        <div class="card-body">
+                            <div class="align-items-center p-3 text-center">
+                                <div class="font-22 text-white"> <i class="lni lni-cup"></i>
+                                </div>
+                                <div class="ms-2"> <span>PRESENSI RAPAT</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        <?php } ?>
         <!-- Statistik Rapat Bulan Ini -->
         <div class="row">
             <div class="col-xl-3 col-lg-6 col-md-6 col-12">
@@ -115,86 +131,70 @@ if (!isset($presensi_hari_ini)) {
 
         <!-- Rapat Hari Ini -->
         <?php if (!empty($rapat_hari_ini)) { ?>
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bx bx-calendar-check"></i> RAPAT HARI INI
-                            <small class="text-muted"><?= $this->tanggalhelper->convertDayDate(date('Y-m-d')) ?></small>
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <?php foreach ($rapat_hari_ini as $rapat) { 
-                                $sudah_presensi = isset($presensi_hari_ini[$rapat->id]);
-                                $jam_sekarang = strtotime(date('H:i:s'));
-                                $jam_mulai = strtotime($rapat->mulai);
-                                $jam_selesai = strtotime($rapat->selesai);
-                                $status_waktu = '';
-                                if ($jam_sekarang < $jam_mulai) {
-                                    $status_waktu = 'warning';
-                                    $label_waktu = 'Belum Dimulai';
-                                } elseif ($jam_sekarang >= $jam_mulai && $jam_sekarang <= $jam_selesai) {
-                                    $status_waktu = 'success';
-                                    $label_waktu = 'Sedang Berlangsung';
-                                } else {
-                                    $status_waktu = 'secondary';
-                                    $label_waktu = 'Selesai';
-                                }
-                            ?>
-                            <div class="list-group-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1"><?= $rapat->agenda ?></h6>
-                                        <p class="mb-1">
-                                            <i class="bx bx-time"></i> <?= $rapat->mulai ?> - <?= $rapat->selesai ?>
-                                            <span class="mx-2">|</span>
-                                            <i class="bx bx-map"></i> <?= $rapat->tempat ?>
-                                        </p>
-                                        <small class="text-muted">
-                                            <?php if ($rapat->peserta) { ?>
-                                                <i class="bx bx-group"></i> <?= $rapat->peserta ?>
-                                            <?php } ?>
-                                        </small>
-                                    </div>
-                                    <div class="text-end">
-                                        <span class="badge bg-<?= $status_waktu ?> mb-2"><?= $label_waktu ?></span>
-                                        <br>
-                                        <?php if ($sudah_presensi) { ?>
-                                            <span class="badge bg-success">
-                                                <i class="bx bx-check"></i> Sudah Presensi
-                                            </span>
-                                        <?php } elseif ($this->session->userdata('agenda_rapat') == 1 && $jam_sekarang >= $jam_mulai && $jam_sekarang <= $jam_selesai) { ?>
-                                            <a href="javascript:;" class="btn btn-sm btn-primary" onclick="$('#presensi').click()">
-                                                <i class="bx bx-check"></i> Presensi
-                                            </a>
-                                        <?php } ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php } ?>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <?php } ?>
-
-        <!-- Tombol Presensi Rapat -->
-        <?php if ($this->session->userdata('agenda_rapat') == 1 && !empty($rapat_hari_ini)) { ?>
             <div class="row">
-                <div class="col">
-                    <a href="javascript:;" class="card bg-gradient-cosmic" id="presensi">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bx bx-calendar-check"></i> RAPAT HARI INI
+                                <small
+                                    class="text-warning"><?= $this->tanggalhelper->convertDayDate(date('Y-m-d')) ?></small>
+                            </h5>
+                        </div>
                         <div class="card-body">
-                            <div class="align-items-center p-3 text-center">
-                                <div class="font-22 text-white"> <i class="lni lni-cup"></i>
-                                </div>
-                                <div class="ms-2"> <span>PRESENSI RAPAT</span>
-                                </div>
+                            <div class="list-group">
+                                <?php foreach ($rapat_hari_ini as $rapat) {
+                                    $sudah_presensi = isset($presensi_hari_ini[$rapat->id]);
+                                    $jam_sekarang = strtotime(date('H:i:s'));
+                                    $jam_mulai = strtotime($rapat->mulai);
+                                    $jam_selesai = strtotime($rapat->selesai);
+                                    $status_waktu = '';
+                                    if ($jam_sekarang < $jam_mulai) {
+                                        $status_waktu = 'warning';
+                                        $label_waktu = 'Belum Dimulai';
+                                    } elseif ($jam_sekarang >= $jam_mulai && $jam_sekarang <= $jam_selesai) {
+                                        $status_waktu = 'success';
+                                        $label_waktu = 'Sedang Berlangsung';
+                                    } else {
+                                        $status_waktu = 'secondary';
+                                        $label_waktu = 'Selesai';
+                                    }
+                                    ?>
+                                    <div class="list-group-item">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1"><?= $rapat->agenda ?></h6>
+                                                <p class="mb-1">
+                                                    <i class="bx bx-time"></i> <?= $rapat->mulai ?> - <?= $rapat->selesai ?>
+                                                    <span class="mx-2">|</span>
+                                                    <i class="bx bx-map"></i> <?= $rapat->tempat ?>
+                                                </p>
+                                                <small class="text-warning">
+                                                    <?php if ($rapat->peserta) { ?>
+                                                        <i class="bx bx-group"></i> <?= $rapat->peserta ?>
+                                                    <?php } ?>
+                                                </small>
+                                            </div>
+                                            <div class="text-end">
+                                                <span class="badge bg-<?= $status_waktu ?> mb-2"><?= $label_waktu ?></span>
+                                                <br>
+                                                <?php if ($sudah_presensi) { ?>
+                                                    <span class="badge bg-success">
+                                                        <i class="bx bx-check"></i> Sudah Presensi
+                                                    </span>
+                                                <?php } elseif ($this->session->userdata('agenda_rapat') == 1 && $jam_sekarang >= $jam_mulai && $jam_sekarang <= $jam_selesai) { ?>
+                                                    <a href="javascript:;" class="btn btn-sm btn-primary"
+                                                        onclick="$('#presensi').click()">
+                                                        <i class="bx bx-check"></i> Presensi
+                                                    </a>
+                                                <?php } ?>
+                                            </div>
+                                        </div>
+                                    </div>
+                                <?php } ?>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 </div>
             </div>
         <?php } ?>
@@ -202,116 +202,118 @@ if (!isset($presensi_hari_ini)) {
         <div class="row">
             <!-- Rapat Mendatang -->
             <?php if (!empty($rapat_mendatang)) { ?>
-            <div class="col-lg-6 col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bx bx-calendar-event"></i> RAPAT MENDATANG
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <?php foreach ($rapat_mendatang as $rapat) { ?>
-                            <div class="list-group-item">
-                                <h6 class="mb-1"><?= $rapat->agenda ?></h6>
-                                <p class="mb-1">
-                                    <i class="bx bx-calendar"></i> <?= $this->tanggalhelper->convertDayDate($rapat->tanggal) ?>
-                                    <span class="mx-2">|</span>
-                                    <i class="bx bx-time"></i> <?= $rapat->mulai ?> - <?= $rapat->selesai ?>
-                                </p>
-                                <small class="text-muted">
-                                    <i class="bx bx-map"></i> <?= $rapat->tempat ?>
-                                </small>
+                <div class="col-lg-6 col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bx bx-calendar-event"></i> RAPAT MENDATANG
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <?php foreach ($rapat_mendatang as $rapat) { ?>
+                                    <div class="list-group-item">
+                                        <h6 class="mb-1"><?= $rapat->agenda ?></h6>
+                                        <p class="mb-1">
+                                            <i class="bx bx-calendar"></i>
+                                            <?= $this->tanggalhelper->convertDayDate($rapat->tanggal) ?>
+                                            <span class="mx-2">|</span>
+                                            <i class="bx bx-time"></i> <?= $rapat->mulai ?> - <?= $rapat->selesai ?>
+                                        </p>
+                                        <small class="text-warning">
+                                            <i class="bx bx-map"></i> <?= $rapat->tempat ?>
+                                        </small>
+                                    </div>
+                                <?php } ?>
                             </div>
-                            <?php } ?>
                         </div>
                     </div>
                 </div>
-            </div>
             <?php } ?>
 
             <!-- Tugas Rapat (Notulis/Dokumenter) -->
             <?php if (!empty($tugas_rapat)) { ?>
-            <div class="col-lg-6 col-12">
-                <div class="card">
-                    <div class="card-header bg-warning">
-                        <h5 class="card-title mb-0 text-white">
-                            <i class="bx bx-task"></i> TUGAS SAYA
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="list-group">
-                            <?php foreach ($tugas_rapat as $rapat) { 
-                                $tugas = [];
-                                if ($rapat->notulis == $this->session->userdata('userid')) {
-                                    $tugas[] = 'Notulis';
-                                }
-                                if ($rapat->dokumenter == $this->session->userdata('userid')) {
-                                    $tugas[] = 'Dokumenter';
-                                }
-                            ?>
-                            <div class="list-group-item">
-                                <h6 class="mb-1"><?= $rapat->agenda ?></h6>
-                                <p class="mb-1">
-                                    <i class="bx bx-calendar"></i> <?= $this->tanggalhelper->convertDayDate($rapat->tanggal) ?>
-                                    <span class="mx-2">|</span>
-                                    <i class="bx bx-time"></i> <?= $rapat->mulai ?> - <?= $rapat->selesai ?>
-                                </p>
-                                <small>
-                                    <span class="badge bg-warning">
-                                        <i class="bx bx-briefcase"></i> <?= implode(', ', $tugas) ?>
-                                    </span>
-                                </small>
+                <div class="col-lg-6 col-12">
+                    <div class="card">
+                        <div class="card-header bg-warning">
+                            <h5 class="card-title mb-0 text-white">
+                                <i class="bx bx-task"></i> TUGAS SAYA
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group">
+                                <?php foreach ($tugas_rapat as $rapat) {
+                                    $tugas = [];
+                                    if ($rapat->notulis == $this->session->userdata('userid')) {
+                                        $tugas[] = 'Notulis';
+                                    }
+                                    if ($rapat->dokumenter == $this->session->userdata('userid')) {
+                                        $tugas[] = 'Dokumenter';
+                                    }
+                                    ?>
+                                    <div class="list-group-item">
+                                        <h6 class="mb-1"><?= $rapat->agenda ?></h6>
+                                        <p class="mb-1">
+                                            <i class="bx bx-calendar"></i>
+                                            <?= $this->tanggalhelper->convertDayDate($rapat->tanggal) ?>
+                                            <span class="mx-2">|</span>
+                                            <i class="bx bx-time"></i> <?= $rapat->mulai ?> - <?= $rapat->selesai ?>
+                                        </p>
+                                        <small>
+                                            <span class="badge bg-warning">
+                                                <i class="bx bx-briefcase"></i> <?= implode(', ', $tugas) ?>
+                                            </span>
+                                        </small>
+                                    </div>
+                                <?php } ?>
                             </div>
-                            <?php } ?>
                         </div>
                     </div>
                 </div>
-            </div>
             <?php } ?>
         </div>
 
         <!-- Rapat Terbaru -->
         <?php if (!empty($rapat_terbaru)) { ?>
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">
-                            <i class="bx bx-history"></i> RAPAT TERBARU
-                        </h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Tanggal</th>
-                                        <th>Agenda</th>
-                                        <th>Waktu</th>
-                                        <th>Tempat</th>
-                                        <th>Jumlah Presensi</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($rapat_terbaru as $rapat) { ?>
-                                    <tr>
-                                        <td><?= $this->tanggalhelper->convertDayDate($rapat->tanggal) ?></td>
-                                        <td><?= $rapat->agenda ?></td>
-                                        <td><?= $rapat->mulai ?> - <?= $rapat->selesai ?></td>
-                                        <td><?= $rapat->tempat ?></td>
-                                        <td>
-                                            <span class="badge bg-info"><?= $rapat->jumlah_presensi ?> orang</span>
-                                        </td>
-                                    </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                                <i class="bx bx-history"></i> RAPAT TERBARU
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Tanggal</th>
+                                            <th>Agenda</th>
+                                            <th>Waktu</th>
+                                            <th>Tempat</th>
+                                            <th>Jumlah Presensi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($rapat_terbaru as $rapat) { ?>
+                                            <tr>
+                                                <td><?= $this->tanggalhelper->convertDayDate($rapat->tanggal) ?></td>
+                                                <td><?= $rapat->agenda ?></td>
+                                                <td><?= $rapat->mulai ?> - <?= $rapat->selesai ?></td>
+                                                <td><?= $rapat->tempat ?></td>
+                                                <td>
+                                                    <span class="badge bg-info"><?= $rapat->jumlah_presensi ?> orang</span>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
         <?php } ?>
 
         <!-- Kalender Rapat -->
@@ -347,9 +349,11 @@ if (!isset($presensi_hari_ini)) {
                             <div class="accordion-body">
                                 <h4>Penambahan Fitur :</h4>
                                 <ol>
-                                    <li>Kalender Rapat di Dashboard - Menampilkan semua agenda rapat dalam bentuk kalender bulanan yang interaktif.
+                                    <li>Kalender Rapat di Dashboard - Menampilkan semua agenda rapat dalam bentuk
+                                        kalender bulanan yang interaktif.
                                     </li>
-                                    <li>Visualisasi agenda rapat per tanggal untuk memudahkan perencanaan dan monitoring.
+                                    <li>Visualisasi agenda rapat per tanggal untuk memudahkan perencanaan dan
+                                        monitoring.
                                     </li>
                                     <li>Detail agenda rapat dapat dilihat dengan mengklik event pada kalender.
                                     </li>
@@ -385,15 +389,18 @@ if (!isset($presensi_hari_ini)) {
                                 <ol>
                                     <li>Dashboard diperkaya dengan informasi statistik rapat yang lebih lengkap.
                                     </li>
-                                    <li>Statistik rapat bulan ini menampilkan total rapat, rapat dengan presensi, dan total presensi.
+                                    <li>Statistik rapat bulan ini menampilkan total rapat, rapat dengan presensi, dan
+                                        total presensi.
                                     </li>
-                                    <li>Daftar rapat hari ini dengan status waktu (Belum Dimulai, Sedang Berlangsung, Selesai).
+                                    <li>Daftar rapat hari ini dengan status waktu (Belum Dimulai, Sedang Berlangsung,
+                                        Selesai).
                                     </li>
                                     <li>Indikator status presensi untuk setiap rapat hari ini.
                                     </li>
                                     <li>Daftar rapat mendatang (7 hari ke depan) untuk perencanaan yang lebih baik.
                                     </li>
-                                    <li>Widget "Tugas Saya" untuk menampilkan rapat dimana pengguna ditunjuk sebagai notulis atau dokumenter.
+                                    <li>Widget "Tugas Saya" untuk menampilkan rapat dimana pengguna ditunjuk sebagai
+                                        notulis atau dokumenter.
                                     </li>
                                     <li>Tabel rapat terbaru dengan informasi jumlah presensi.
                                     </li>
@@ -404,7 +411,8 @@ if (!isset($presensi_hari_ini)) {
                                     </li>
                                     <li>Optimasi tampilan dashboard dengan layout yang lebih informatif dan responsif.
                                     </li>
-                                    <li>Peningkatan user experience dengan informasi yang lebih detail dan mudah dipahami.
+                                    <li>Peningkatan user experience dengan informasi yang lebih detail dan mudah
+                                        dipahami.
                                     </li>
                                 </ol>
                                 Buku Panduan penggunaan aplikasi dapat di unduh melalui <a
@@ -485,6 +493,7 @@ if (!isset($presensi_hari_ini)) {
         background-color: #fff3cd !important;
         border: 2px solid #ffc107 !important;
     }
+
     .fc-day-today .fc-daygrid-day-number {
         background-color: #ffc107;
         color: #000;
@@ -493,11 +502,13 @@ if (!isset($presensi_hari_ini)) {
         border-radius: 3px;
         position: relative;
     }
+
     .fc-day-today .fc-daygrid-day-number::after {
         content: " (Hari Ini)";
         font-size: 0.75em;
         font-weight: normal;
     }
+
     #kalenderRapat {
         padding: 10px;
     }
@@ -537,13 +548,13 @@ if (!isset($presensi_hari_ini)) {
                 eventClick: function (info) {
                     var event = info.event;
                     var extendedProps = event.extendedProps;
-                    var tanggal = event.start.toLocaleDateString('id-ID', { 
-                        weekday: 'long', 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                    var tanggal = event.start.toLocaleDateString('id-ID', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
                     });
-                    
+
                     var htmlContent = `
                         <div class="text-start">
                             <p><strong>Agenda:</strong> ${extendedProps.agenda}</p>
