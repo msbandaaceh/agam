@@ -19,6 +19,7 @@
     <link href="assets/plugins/bootstrap-material-datetimepicker/css/bootstrap-material-datetimepicker.min.css"
         rel="stylesheet" />
     <link href="assets/plugins/fancy-file-uploader/fancy_fileupload.css" rel="stylesheet" />
+    <link href="assets/plugins/fullcalendar/css/main.min.css" rel="stylesheet" />
     <!-- Bootstrap CSS -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/bootstrap-extended.css" rel="stylesheet">
@@ -242,6 +243,7 @@
     <script src="assets/plugins/fancy-file-uploader/jquery.fileupload.js"></script>
     <script src="assets/plugins/fancy-file-uploader/jquery.iframe-transport.js"></script>
     <script src="assets/plugins/fancy-file-uploader/jquery.fancy-fileupload.js"></script>
+    <script src="assets/plugins/fullcalendar/js/main.min.js"></script>
 
     <!--app JS-->
     <script src="assets/js/app.js"></script>

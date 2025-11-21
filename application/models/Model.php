@@ -421,4 +421,16 @@ class Model extends CI_Model
         $query = $this->db->get();
         return $query;
     }
+
+    public function get_rapat_kalender($tgl_awal, $tgl_akhir)
+    {
+        $this->db->select('id, tanggal, agenda, mulai, selesai, tempat, peserta');
+        $this->db->from('register_rapat');
+        $this->db->where('hapus', '0');
+        $this->db->where("tanggal >= '" . $tgl_awal . "'");
+        $this->db->where("tanggal <= '" . $tgl_akhir . "'");
+        $this->db->order_by('tanggal', 'ASC');
+        $this->db->order_by('mulai', 'ASC');
+        return $this->db->get()->result_array();
+    }
 }

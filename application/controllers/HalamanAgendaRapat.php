@@ -288,4 +288,33 @@ class HalamanAgendaRapat extends MY_Controller
 
         echo json_encode(['success' => true]);
     }
+
+    public function get_rapat_kalender()
+    {
+        $start = $this->input->get('start');
+        $end = $this->input->get('end');
+        
+        $data_rapat = $this->model->get_rapat_kalender($start, $end);
+        
+        $events = [];
+
+        foreach ($data_rapat as $rapat) {
+            $events[] = [
+                'id' => 'rapat_' . $rapat['id'],
+                'title' => $rapat['agenda'],
+                'start' => $rapat['tanggal'],
+                'color' => '#007bff',
+                'extendedProps' => [
+                    'tipe' => 'rapat',
+                    'agenda' => $rapat['agenda'],
+                    'mulai' => $rapat['mulai'],
+                    'selesai' => $rapat['selesai'],
+                    'tempat' => $rapat['tempat'],
+                    'peserta' => $rapat['peserta']
+                ]
+            ];
+        }
+        
+        echo json_encode($events);
+    }
 }

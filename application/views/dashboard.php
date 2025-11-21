@@ -314,19 +314,71 @@ if (!isset($presensi_hari_ini)) {
         </div>
         <?php } ?>
 
+        <!-- Kalender Rapat -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="bx bx-calendar"></i> KALENDER RAPAT
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="kalenderRapat"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card">
             <div class="card-body">
                 <h5 class="card-title">INFORMASI</h5>
                 <hr />
                 <div class="accordion" id="accordionExample">
                     <div class="accordion-item">
-                        <h2 class="accordion-header" id="headingTwo">
+                        <h2 class="accordion-header" id="headingThree">
                             <button class="accordion-button" type="button" data-bs-toggle="collapse"
-                                data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                                data-bs-target="#collapseThree" aria-expanded="true" aria-controls="collapseThree">
+                                APLIKASI MANAJEMEN RAPAT PEGAWAI versi 1.2.0
+                            </button>
+                        </h2>
+                        <div id="collapseThree" class="accordion-collapse collapse show" aria-labelledby="headingThree"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <h4>Penambahan Fitur :</h4>
+                                <ol>
+                                    <li>Kalender Rapat di Dashboard - Menampilkan semua agenda rapat dalam bentuk kalender bulanan yang interaktif.
+                                    </li>
+                                    <li>Visualisasi agenda rapat per tanggal untuk memudahkan perencanaan dan monitoring.
+                                    </li>
+                                    <li>Detail agenda rapat dapat dilihat dengan mengklik event pada kalender.
+                                    </li>
+                                    <li>Highlight tanggal hari ini pada kalender untuk memudahkan identifikasi.
+                                    </li>
+                                    <li>Navigasi bulan untuk melihat agenda rapat di bulan sebelumnya atau selanjutnya.
+                                    </li>
+                                </ol>
+                                <h4>Optimasi :</h4>
+                                <ol>
+                                    <li>Integrasi kalender rapat langsung di dashboard untuk akses yang lebih cepat.
+                                    </li>
+                                    <li>Peningkatan user experience dengan tampilan kalender yang user-friendly.
+                                    </li>
+                                </ol>
+                                Buku Panduan penggunaan aplikasi dapat di unduh melalui <a
+                                    href="https://drive.google.com/file/d/15TFYfLGWsq40X9B5wHVbtCGvD51b6sQo/view?usp=drive_link">tautan
+                                    ini</a>.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
                                 APLIKASI MANAJEMEN RAPAT PEGAWAI versi 1.1.0
                             </button>
                         </h2>
-                        <div id="collapseTwo" class="accordion-collapse collapse show" aria-labelledby="headingTwo"
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
                             data-bs-parent="#accordionExample">
                             <div class="accordion-body">
                                 <h4>Penambahan Fitur :</h4>
@@ -428,7 +480,97 @@ if (!isset($presensi_hari_ini)) {
     <!-- /.modal-dialog -->
 </div>
 
+<style>
+    .fc-day-today {
+        background-color: #fff3cd !important;
+        border: 2px solid #ffc107 !important;
+    }
+    .fc-day-today .fc-daygrid-day-number {
+        background-color: #ffc107;
+        color: #000;
+        font-weight: bold;
+        padding: 2px 6px;
+        border-radius: 3px;
+        position: relative;
+    }
+    .fc-day-today .fc-daygrid-day-number::after {
+        content: " (Hari Ini)";
+        font-size: 0.75em;
+        font-weight: normal;
+    }
+    #kalenderRapat {
+        padding: 10px;
+    }
+</style>
+
 <script>
+    // Inisialisasi Kalender Rapat
+    $(document).ready(function () {
+        var calendarEl = document.getElementById('kalenderRapat');
+        if (calendarEl) {
+            var calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                firstDay: 1, // Monday
+                locale: 'id',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: function (fetchInfo, successCallback, failureCallback) {
+                    $.ajax({
+                        url: 'get_rapat_kalender',
+                        method: 'GET',
+                        data: {
+                            start: fetchInfo.startStr,
+                            end: fetchInfo.endStr
+                        },
+                        success: function (response) {
+                            var events = JSON.parse(response);
+                            successCallback(events);
+                        },
+                        error: function () {
+                            failureCallback();
+                        }
+                    });
+                },
+                eventClick: function (info) {
+                    var event = info.event;
+                    var extendedProps = event.extendedProps;
+                    var tanggal = event.start.toLocaleDateString('id-ID', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                    
+                    var htmlContent = `
+                        <div class="text-start">
+                            <p><strong>Agenda:</strong> ${extendedProps.agenda}</p>
+                            <p><strong>Tanggal:</strong> ${tanggal}</p>
+                            <p><strong>Waktu:</strong> ${extendedProps.mulai} - ${extendedProps.selesai}</p>
+                            <p><strong>Tempat:</strong> ${extendedProps.tempat || '-'}</p>
+                            <p><strong>Peserta:</strong> ${extendedProps.peserta || '-'}</p>
+                        </div>
+                    `;
+
+                    Swal.fire({
+                        title: 'Detail Agenda Rapat',
+                        html: htmlContent,
+                        icon: 'info',
+                        confirmButtonText: 'Tutup',
+                        width: '600px'
+                    });
+                },
+                eventDisplay: 'block',
+                dayMaxEvents: 3,
+                moreLinkClick: 'popover'
+            });
+
+            calendar.render();
+        }
+    });
+
     $('#presensi').on('click', async function () {
         var ipLokal = '<?= $this->session->userdata('ip_satker') ?>';
         var mobile = '<?= $this->agent->is_mobile() ?>';
