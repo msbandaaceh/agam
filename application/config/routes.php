@@ -15,6 +15,7 @@ $route['show_tabel_detil_presensi_rapat'] = 'HalamanLaporan/show_tabel_detil_pre
 $route['show_rapat'] = 'HalamanAgendaRapat/show_rapat';
 $route['show_notulen'] = 'HalamanAgendaRapat/show_notulen';
 $route['show_dokumentasi'] = 'HalamanAgendaRapat/show_dokumentasi';
+$route['get_rapat_kalender'] = 'HalamanAgendaRapat/get_rapat_kalender';
 $route['show_presensi_rapat'] = 'HalamanUtama/show_presensi_rapat';
 $route['show_presensi'] = 'HalamanLaporan/show_presensi';
 $route['simpan_presensi'] = 'HalamanUtama/simpan_presensi';
