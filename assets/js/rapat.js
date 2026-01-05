@@ -1077,6 +1077,18 @@ function loadRapat(id, isDetail = false) {
                 document.getElementById('tempat').setAttribute('readonly', true);
                 document.getElementById('agenda').setAttribute('readonly', true);
                 document.getElementById('peserta').setAttribute('readonly', true);
+            } else {
+                $('#mulai, #selesai').prop('disabled', false);
+                if (['operator', 'admin'].includes(peran)) {
+                    document.getElementById('btn-edit').style.display = "none";
+                } else {
+                    document.getElementById('btn-edit').style.display = "block";
+                }
+                document.getElementById('btn-simpan').style.display = "block";
+                document.getElementById('no').setAttribute('readonly', false);
+                document.getElementById('tempat').setAttribute('readonly', false);
+                document.getElementById('agenda').setAttribute('readonly', false);
+                document.getElementById('peserta').setAttribute('readonly', false);
             }
         }
     });
