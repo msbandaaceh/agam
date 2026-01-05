@@ -948,6 +948,7 @@ function hapusPegawai(id) {
 }
 
 function loadRapat(id, isDetail = false) {
+    document.getElementById('notif_').style.display = "none";
     $.post('show_rapat', {
         id: id
     }, function (response) {
@@ -1085,10 +1086,10 @@ function loadRapat(id, isDetail = false) {
                     document.getElementById('btn-edit').style.display = "block";
                 }
                 document.getElementById('btn-simpan').style.display = "block";
-                document.getElementById('no').setAttribute('readonly', false);
-                document.getElementById('tempat').setAttribute('readonly', false);
-                document.getElementById('agenda').setAttribute('readonly', false);
-                document.getElementById('peserta').setAttribute('readonly', false);
+                document.getElementById('no').removeAttribute('readonly');
+                document.getElementById('tempat').removeAttribute('readonly');
+                document.getElementById('agenda').removeAttribute('readonly');
+                document.getElementById('peserta').removeAttribute('readonly');
             }
         }
     });

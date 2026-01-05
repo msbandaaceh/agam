@@ -299,7 +299,7 @@
         };
     </script>
 
-    <script src="assets/js/rapat.js?v=1.2.0"></script>
+    <script src="assets/js/rapat.js?v=1.2.1"></script>
 </body>
 
 </html>
