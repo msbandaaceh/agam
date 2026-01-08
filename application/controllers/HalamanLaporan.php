@@ -237,7 +237,7 @@ class HalamanLaporan extends MY_Controller
         );
 
         if ($ttd == '1') {
-            $link = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . base64_encode($this->encryption->encrypt($query->row()->penandatangan)); // atau link apapun sesuai kebutuhan
+            $link = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . $query->row()->penandatangan; // atau link apapun sesuai kebutuhan
             $logoPath = $this->session->userdata('logo_satker'); // path logo PNG kecil
 
             $result = Builder::create()
@@ -311,7 +311,7 @@ class HalamanLaporan extends MY_Controller
         $data['dokumentasi'] = $dokumentasi;
 
         if ($ttd == '1') {
-            $link = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . base64_encode($this->encryption->encrypt($query->row()->penandatangan)); // atau link apapun sesuai kebutuhan
+            $link = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . $query->row()->penandatangan; // atau link apapun sesuai kebutuhan
             $logoPath = $this->session->userdata('logo_satker'); // path logo PNG kecil
 
             $result = Builder::create()
@@ -327,7 +327,7 @@ class HalamanLaporan extends MY_Controller
 
             $data['qr_code_pejabat'] = $result->getDataUri();
 
-            $link1 = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . base64_encode($this->encryption->encrypt($query->row()->notulis)); // atau link apapun sesuai kebutuhan
+            $link1 = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . $query->row()->notulis; // atau link apapun sesuai kebutuhan
 
             $result = Builder::create()
                 ->writer(new PngWriter())
@@ -383,7 +383,7 @@ class HalamanLaporan extends MY_Controller
         );
 
         if ($ttd == '1') {
-            $link = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . base64_encode($this->encryption->encrypt($query->row()->penandatangan)); // atau link apapun sesuai kebutuhan
+            $link = $this->config->item('sso_server') . 'halamankartupegawai/kartu_pegawai/' . $query->row()->penandatangan; // atau link apapun sesuai kebutuhan
             $logoPath = $this->session->userdata('logo_satker'); // path logo PNG kecil
 
             $result = Builder::create()
