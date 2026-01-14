@@ -12,7 +12,7 @@ $ssl =
 $protocol = $ssl ? "https://" : "http://";
 
 $config['base_url'] = $protocol . $_SERVER['SERVER_NAME'] . '/';
-$config['sso_server'] = 'https://sso.ms-bandaaceh.go.id/'; # Domain SSO Server
+$config['sso_server'] = $protocol . 'sso.ms-bandaaceh.go.id/'; # Domain SSO Server
 $config['id_app'] = '5'; # ID Aplikasi Client
 
 $config['index_page'] = '';
@@ -72,8 +72,8 @@ $config['time_reference'] = 'local';
 $config['rewrite_short_tags'] = FALSE;
 $config['proxy_ips'] = '';
 
-$config['jwt_key'] = 'M4hk4m4hBn4@2025';
-$config['jwt_issuer'] = '.ms-bandaaceh.go.id';
+$config['jwt_key'] = 'Brisingr@3234#saPPhire3234';
+$config['jwt_issuer'] = 'sso.local';
 $config['jwt_expire_time'] = 3600; // 1 jam
 
 $config['api_key'] = 'M4hk4m4hBn4@2025';
