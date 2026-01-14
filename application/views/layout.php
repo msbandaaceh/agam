@@ -162,6 +162,9 @@
                             </div>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="<?= $this->session->userdata('sso_server') ?>"><i
+                                        class='bx bx-transfer-alt'></i><span>Pindah Layanan</span></a>
+                            </li>
                             <li><a class="dropdown-item" href="keluar"><i
                                         class='bx bx-log-out-circle'></i><span>Keluar</span></a>
                             </li>
