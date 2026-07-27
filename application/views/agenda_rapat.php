@@ -137,7 +137,7 @@
                     <div class="col">
                         <label for="dokumenter" class="form-label">Notifikasi Ulang Di Grup Whatsapp</label>
                         <div class="form-check form-switch">
-                            <input type="hidden" name="info" id="info_value" value="1">
+                            <input type="hidden" name="info" id="info_value" value="0">
                             <input class="form-check-input" type="checkbox" id="info">
                             <label class="form-check-label" id="chkInfo" for="info">Tidak</label>
                         </div>
