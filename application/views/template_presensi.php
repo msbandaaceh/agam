@@ -133,19 +133,19 @@
                 foreach ($peserta as $item) {
                     ?>
                     <tr>
-                        <td class="text-center" style="padding: 1px">
+                        <td style="text-align: center">
                             <?= $no; ?>
                         </td>
-                        <td style="padding: 1px">
+                        <td style="margin-left: 2px">
                             <?= $item->nip; ?>
                         </td>
-                        <td style="padding: 1px">
+                        <td style="margin-left: 2px">
                             <?= $item->nama; ?>
                         </td>
-                        <td style="padding: 1px">
+                        <td style="margin-left: 2px">
                             <?= $item->jabatan; ?>
                         </td>
-                        <td class="text-center" style="padding: 1px">
+                        <td style="text-align: center">
                             <?= $item->waktu; ?>
                         </td>
                     </tr>
@@ -156,6 +156,59 @@
             </tbody>
         </table>
     </div>
+
+    <?php
+    $hasGuest = isset($guest_presensi) && !empty($guest_presensi);
+    if ($hasGuest && !empty($guest_presensi)): ?>
+        <div style="text-align: justify; margin-bottom: 5px;">
+            <table id="tabel1" class="table table-bordered table-hover"
+                style="font-family: 'Bookman Old Style', serif; font-size: 12px;">
+                <thead>
+                    <tr>
+                        <td colspan="5"
+                            style="padding: 2px; background-color: #e9ecef; font-weight: bold; font-size: 11px; text-align: center">
+                            <strong>TAMU</strong>
+                        </td>
+                    </tr>
+                    <tr>
+                        <th class="text-center" style="width: 1%">NO</th>
+                        <th class="text-center">NIP / NIK</th>
+                        <th class="text-center">NAMA</th>
+                        <th class="text-center">JABATAN / INSTANSI / PEKERJAAN</th>
+                        <th class="text-center">WAKTU</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $no = 1;
+                    $hasGuest = isset($guest_presensi) && !empty($guest_presensi);
+                    foreach ($guest_presensi as $item) {
+                        ?>
+                        <tr>
+                            <td style="text-align: center">
+                                <?= $no; ?>
+                            </td>
+                            <td class="ml-2">
+                                <?= $item->no_identitas; ?>
+                            </td>
+                            <td class="ml-2">
+                                <?= $item->nama; ?>
+                            </td>
+                            <td class="ml-2">
+                                <?= $item->jabatan_instansi; ?>
+                            </td>
+                            <td style="text-align: center">
+                                <?= $item->waktu; ?>
+                            </td>
+                        </tr>
+                        <?php
+                        $no++;
+                    }
+                    ?>
+                </tbody>
+            </table>
+        </div>
+    <?php endif ?>
 
     <table style="width: 100%; border: none; font-family: 'Bookman Old Style', serif; font-size: 12px;">
         <tr>

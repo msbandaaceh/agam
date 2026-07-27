@@ -37,3 +37,14 @@ $route['blok_peran'] = 'HalamanUtama/blok_peran';
 $route['aktif_peran'] = 'HalamanUtama/aktif_peran';
 
 $route['keluar'] = 'HalamanUtama/keluar';
+
+# ROUTE PRESENSI TAMU (publik tanpa SSO)
+$route['presensi-tamu/(:any)'] = 'PresensiTamu/index/$1';
+$route['simpan_presensi_tamu'] = 'PresensiTamu/submit';
+$route['presensi-tamu-sukses/(:any)'] = 'PresensiTamu/sukses/$1';
+$route['show_presensi_tamu_qr/(:any)'] = 'HalamanLaporan/show_presensi_tamu_qr/$1';
+
+$route['show_qr_tamu'] = 'HalamanLaporan/show_qr_tamu';
+$route['show_presensi_tamu'] = 'HalamanLaporan/show_presensi_tamu';
+$route['hapus_presensi_tamu'] = 'HalamanLaporan/hapus_presensi_tamu';
+$route['simpan_presensi_tamu_manual'] = 'HalamanLaporan/simpan_presensi_tamu';

@@ -27,14 +27,17 @@ class HalamanLaporan extends MY_Controller
     public function show_tabel_detil_presensi_rapat()
     {
         $idrapat = $this->encryption->decrypt(base64_decode($this->input->post('idrapat')));
-        $query = $this->model->get_detail_presensi_rapat($idrapat);
+        $query = $this->model->get_presensi_gabungan($idrapat);
 
         $data = [];
         foreach ($query as $row) {
             $data[] = [
-                'id' => base64_encode($this->encryption->encrypt($row->id)),
-                'nama' => $row->nama,
-                'waktu' => $row->waktu
+                'id' => base64_encode($this->encryption->encrypt($row->id_raw)),
+                'nama' => $row->nama . (isset($row->tipe) && $row->tipe === 'TAMU' ? ' <span class="badge bg-info">Tamu</span>' : ''),
+                'jabatan' => $row->jabatan,
+                'identitas' => $row->nip,
+                'waktu' => $row->waktu,
+                'tipe' => $row->tipe ?? 'INTERNAL'
             ];
         }
 
@@ -379,7 +382,8 @@ class HalamanLaporan extends MY_Controller
             'tempat' => $tempat,
             'nama' => $nama,
             'kop' => $this->session->userdata('kop_satker'),
-            'peserta' => $this->model->get_detail_presensi_rapat($id)
+            'peserta' => $this->model->get_presensi_internal($id),
+            'guest_presensi' => $this->model->get_daftar_tamu($id)
         );
 
         if ($ttd == '1') {
@@ -408,5 +412,250 @@ class HalamanLaporan extends MY_Controller
         $this->pdf->set_option('isRemoteEnabled', true);
         $this->pdf->render();
         $this->pdf->stream('Presensi_Rapat_' . $clean_nomor . '.pdf', array("Attachment" => 1));
+    }
+
+    /**
+     * Show guest QR code as standalone view.
+     * URL: /halamanlaporan/show_presensi_tamu_qr/{base64_encrypted_id}
+     */
+    public function show_presensi_tamu_qr()
+    {
+        $idraw = $this->encryption->decrypt(base64_decode($this->uri->segment(2)));
+        if (!is_numeric($idraw) || (int) $idraw <= 0) {
+            show_404();
+            return;
+        }
+        $id = (int) $idraw;
+
+        $rapat = $this->model->get_seleksi_array('register_rapat', ['id' => $id])->row();
+        if (!$rapat) {
+            show_404();
+            return;
+        }
+
+        // Tidak lagi menggunakan token khusus sebagai limit waktu.
+        // Validasi waktu presensi sepenuhnya menggunakan jam mulai/selesai rapat.
+        $encoded = base64_encode($this->encryption->encrypt($id));
+        $url = base_url('presensi-tamu/' . $encoded);
+
+        $logoPath = $this->session->userdata('logo_satker');
+
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data($url)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+            ->size(400)
+            ->margin(5)
+            ->logoPath($logoPath)
+            ->logoResizeToWidth(40)
+            ->build();
+
+        $data = [
+            'rapat' => $rapat,
+            'url' => $url,
+            'qr_code' => $result->getDataUri(),
+        ];
+
+        $this->load->view('presensi_tamu_qr', $data);
+    }
+
+    /**
+     * Generate QR publik yang berisi URL form presensi tamu.
+     * Digunakan pada undangan/notulen untuk dicetak dan ditempel di ruang rapat.
+     */
+    public function get_qr_presensi_tamu($id, $size = 200)
+    {
+        $rapat = $this->model->get_seleksi_array('register_rapat', ['id' => $id])->row();
+        if (!$rapat) {
+            show_404();
+            return;
+        }
+
+        $token = $rapat->qr_token;
+        if (empty($token)) {
+            $token = $this->model->generate_qr_token($id);
+        }
+
+        $encoded = base64_encode($this->encryption->encrypt($id));
+        $url = base_url('presensi-tamu/' . $encoded);
+
+        $logoPath = $this->session->userdata('logo_satker');
+
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data($url)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+            ->size((int) $size)
+            ->margin(2)
+            ->logoPath($logoPath)
+            ->logoResizeToWidth(30)
+            ->build();
+
+        $data = [
+            'rapat' => $rapat,
+            'token' => $token,
+            'url' => $url,
+            'qr_code' => $result->getDataUri()
+        ];
+
+        $this->load->view('presensi_tamu_qr', $data);
+    }
+
+    /**
+     * Hapus presensi tamu (manual oleh admin/operator).
+     */
+    public function hapus_presensi_tamu()
+    {
+        $id = $this->encryption->decrypt(base64_decode($this->input->post('id')));
+        $query = $this->model->get_seleksi_array('presensi_tamu_rapat', ['id' => $id]);
+        $idrapat = $query->row()->idrapat;
+
+        $hapus = $this->model->pembaharuan_data('presensi_tamu_rapat', ['hapus' => '1'], 'id', $id);
+
+        if ($hapus == 1) {
+
+            echo json_encode(
+                array(
+                    'st' => 1,
+                    'idrapat' => base64_encode($this->encryption->encrypt($idrapat))
+                )
+            );
+        } else {
+            echo json_encode(
+                array(
+                    'st' => 0
+                )
+            );
+        }
+
+        return;
+    }
+
+    /**
+     * Generate ulang token QR publik untuk rapat tertentu.
+     * Dipanggil saat admin ingin me-reset link QR presensi tamu.
+     */
+    public function regenerate_qr_token()
+    {
+        $id = $this->encryption->decrypt(base64_decode($this->input->post('id')));
+
+        $token = $this->model->generate_qr_token($id);
+        $encoded = base64_encode($this->encryption->encrypt($id));
+        $url = base_url('presensi-tamu/' . $encoded);
+
+        echo json_encode([
+            'st' => 1,
+            'url' => $url,
+            'encoded' => $encoded,
+            'message' => 'Token QR berhasil diperbarui'
+        ]);
+    }
+
+    /**
+     * Mengembalikan data QR publik untuk rapat (untuk preview di UI).
+     */
+    public function show_qr_tamu()
+    {
+        $id = $this->encryption->decrypt(base64_decode($this->input->post('id')));
+        $rapat = $this->model->get_seleksi_array('register_rapat', ['id' => $id])->row();
+        if (!$rapat) {
+            echo json_encode(['st' => 0, 'message' => 'Rapat tidak ditemukan']);
+            return;
+        }
+
+        $token = $rapat->qr_token;
+        if (empty($token)) {
+            $token = $this->model->generate_qr_token($id);
+        }
+
+        $encoded = base64_encode($this->encryption->encrypt($id));
+        $url = base_url('presensi-tamu/' . $encoded);
+
+        $logoPath = $this->session->userdata('logo_satker');
+
+        $result = Builder::create()
+            ->writer(new PngWriter())
+            ->data($url)
+            ->encoding(new Encoding('UTF-8'))
+            ->errorCorrectionLevel(new ErrorCorrectionLevelHigh())
+            ->size(250)
+            ->margin(2)
+            ->logoPath($logoPath)
+            ->logoResizeToWidth(40)
+            ->build();
+
+        echo json_encode([
+            'st' => 1,
+            'url' => $url,
+            'qr_code' => $result->getDataUri(),
+            'agenda' => $rapat->agenda,
+            'tanggal' => $this->tanggalhelper->convertDayDate($rapat->tanggal),
+            'waktu' => $rapat->mulai . ' - ' . $rapat->selesai
+        ]);
+    }
+
+    public function show_presensi_tamu()
+    {
+        $id = $this->encryption->decrypt(base64_decode($this->input->post('id')));
+
+        $waktu = '';
+        $nama = '';
+        $instansi = '';
+        $no = '';
+
+        if ($id == '-1') {
+            $judul = "TAMBAH DATA PRESENSI TAMU";
+        } else {
+            $judul = "EDIT DATA PRESENSI TAMU";
+            $query = $this->model->get_seleksi_array('presensi_tamu_rapat', ['id' => $id]);
+            $nama = $query->row()->nama;
+            $instansi = $query->row()->jabatan_instansi;
+            $no = $query->row()->no_identitas;
+            $waktu = $query->row()->waktu_presensi;
+        }
+
+        echo json_encode([
+            'st' => 1,
+            'id' => $this->input->post('id'),
+            'judul' => $judul,
+            'idrapat' => $this->input->post('idrapat'),
+            'nama' => $nama,
+            'instansi' => $instansi,
+            'no' => $no,
+            'waktu' => $waktu
+        ]);
+    }
+
+    public function simpan_presensi_tamu()
+    {
+        $this->form_validation->set_rules('nama_tamu', 'Nama Tamu', 'trim|required');
+        $this->form_validation->set_rules('jabatan_instansi', 'Jabatan/Instansi/Pekerjaan', 'trim|required');
+        $this->form_validation->set_rules('no_identitas', 'Nomor Identitas', 'trim|required');
+        $this->form_validation->set_rules('waktu', 'Waktu Presensi', 'trim|required');
+
+        $this->form_validation->set_message(['required' => '%s Tidak Boleh Kosong']);
+
+        if ($this->form_validation->run() == FALSE) {
+            echo json_encode(['success' => 2, 'message' => validation_errors()]);
+            return;
+        }
+
+        $data = [
+            'id' => $this->encryption->decrypt(base64_decode($this->input->post('id'))),
+            'idrapat' => $this->encryption->decrypt(base64_decode($this->input->post('idrapat'))),
+            'nama' => $this->input->post('nama_tamu'),
+            'jabatan_instansi' => $this->input->post('jabatan_instansi'),
+            'no_identitas' => $this->input->post('no_identitas'),
+            'waktu_presensi' => $this->input->post('waktu')
+        ];
+
+        $result = $this->model->proses_simpan_presensi_manual_tamu($data);
+        if ($result['status']) {
+            echo json_encode(['success' => 1, 'message' => $result['message'], 'idrapat' => $this->input->post('idrapat')]);
+        } else {
+            echo json_encode(['success' => 3, 'message' => $result['message']]);
+        }
     }
 }

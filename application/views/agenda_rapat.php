@@ -232,6 +232,26 @@
     </div>
 </div>
 
+<div class="modal fade" id="modalQrTamu" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content bg-gradient-moonlit">
+            <div class="modal-header">
+                <h5 class="modal-title text-white"><i class="bx bxs-qr"></i> QR Presensi Tamu</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4" id="qrTamuContent">
+                <div class="text-muted py-5">
+                    <i class="bx bx-loader-alt bx-spin font-32"></i>
+                    <p class="mt-2 mb-0">Memuat QR Code...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     $(document).ready(function () {
         loadTabelAgendaRapat();
@@ -279,4 +299,26 @@
         document.getElementById('agenda').removeAttribute('readonly');
         document.getElementById('peserta').removeAttribute('readonly');
     });
+
+    let qrCurrentId = null;
+
+    function bukaQrTamu(idRapat) {
+        const content = document.getElementById('qrTamuContent');
+        content.innerHTML = `
+            <div class="text-muted py-5">
+                <i class="bx bx-loader-alt bx-spin font-32"></i>
+                <p class="mt-2 mb-0">Memuat QR Code...</p>
+            </div>
+        `;
+        console.log(idRapat);
+        $.get('show_presensi_tamu_qr/' + idRapat, function (html) {
+            content.innerHTML = html;
+        }).fail(function () {
+            content.innerHTML = `
+                <div class="alert alert-danger">
+                    Gagal memuat QR Code. Silakan coba lagi.
+                </div>
+            `;
+        });
+    }
 </script>

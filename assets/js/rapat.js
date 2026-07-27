@@ -366,10 +366,15 @@ function loadTabelAgendaRapat() {
 
                 if (['admin', 'operator'].includes(peran)) {
                     tombolAksi += `
-                        <button type="button" class="btn btn-danger" title="Hapus Data"
-                            onclick="hapusRapat('${row.id}')">
-                            <i class="bx bxs-trash"></i>
-                        </button>
+                            <button type="button" class="btn btn-secondary" title="QR Presensi Tamu"
+                                data-bs-target="#modalQrTamu"
+                                onclick="bukaQrTamu('${row.id}')"
+                                data-bs-toggle="modal"><i class="bx bxs-barcode"></i>
+                            </button>
+                            <button type="button" class="btn btn-danger" title="Hapus Data"
+                                onclick="hapusRapat('${row.id}')">
+                                <i class="bx bxs-trash"></i>
+                            </button>
                     `;
                 }
 
@@ -528,7 +533,24 @@ function loadTabelDetilPresensiRapat(idrapat) {
 
             json.data_rapat.forEach((row, index) => {
                 let tombolAksi = `
-                    <div class="btn-group" role="group" aria-label="Basic example">
+                    <div class="btn-group" role="group" aria-label="Basic example">`
+                    ;
+
+                if (row.tipe == 'TAMU') {
+                    tombolAksi += `
+                        <button type="button" class="btn btn-warning" title="Edit Presensi"
+                            data-bs-target="#tambah-tamu"
+                            onclick="presensiTamu('${json.idrapat}', '${row.id}')"
+                            data-bs-toggle="modal"><i class="bx bxs-pencil"></i>
+                        </button>
+                        <button type="button" class="btn btn-danger" title="Hapus Data"
+                            onclick="hapusTamu('${row.id}')">
+                            <i class="bx bxs-trash"></i>
+                        </button>
+                            
+                    `;
+                } else {
+                    tombolAksi += `
                         <button type="button" class="btn btn-warning" title="Edit Presensi"
                             data-bs-target="#tambah-pegawai"
                             onclick="presensiPegawai('${json.idrapat}', '${row.id}')"
@@ -538,7 +560,8 @@ function loadTabelDetilPresensiRapat(idrapat) {
                             onclick="hapusPegawai('${row.id}')">
                             <i class="bx bxs-trash"></i>
                         </button>
-                `;
+                    `;
+                }
 
                 tombolAksi += `</div>`;
 
@@ -786,6 +809,31 @@ $(function () {
         });
     });
 
+    $(document).off('submit', '#formTambahPresensiTamu').on('submit', '#formTambahPresensiTamu', function (e) {
+        e.preventDefault();
+        let form = this;
+        let formData = new FormData(form);
+
+        $.ajax({
+            url: 'simpan_presensi_tamu_manual',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            dataType: 'json',
+            success: function (res) {
+                notifikasi(res.message, res.success);
+                if (res.success == '1') {
+                    $('#tambah-tamu').modal('hide');
+                    loadTabelDetilPresensiRapat(res.idrapat);
+                }
+            },
+            error: function () {
+                notifikasi('Terjadi kesalahan saat menyimpan data.', 4);
+            }
+        });
+    });
+
     $(document).off('submit', '#formDokumenRapat').on('submit', '#formDokumenRapat', function (e) {
         e.preventDefault();
         let form = this;
@@ -947,6 +995,41 @@ function hapusPegawai(id) {
     });
 }
 
+function hapusTamu(id) {
+    Swal.fire({
+        title: "<h5>HAPUS PRESENSI TAMU</h5>",
+        html: "<h5>Apa Anda Yakin Akan Menghapus Presensi Tamu?</h5>",
+        icon: "warning",
+        background: '#1e1e1e',
+        showCancelButton: true,
+        confirmButtonColor: "#DD2A2A",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Ya, Hapus !",
+        cancelButtonText: "Tidak !"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.post('hapus_presensi_tamu', { id: id }, function (response) {
+                var json = jQuery.parseJSON(response);
+                if (json.st == 1) {
+                    Swal.fire({
+                        title: "Berhasil !",
+                        text: "Anda Sudah Menghapus Presensi Tamu",
+                        icon: "success",
+                        confirmButtonColor: "#8EC165",
+                        confirmButtonText: "Oke"
+                    }).then(() => {
+                        loadTabelDetilPresensiRapat(json.idrapat);
+                    });
+                } else {
+                    Swal.fire("Gagal", "Anda Gagal Menghapus Presensi Tamu, Silakan Ulangi Lagi", "error");
+                }
+            });
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            Swal.fire("Batal", "Anda Batal Menghapus Presensi", "info");
+        }
+    });
+}
+
 function loadRapat(id, isDetail = false) {
     document.getElementById('notif_').style.display = "none";
     $.post('show_rapat', {
@@ -1035,7 +1118,7 @@ function loadRapat(id, isDetail = false) {
             $("#id").val(json.id);
             $("#judul_").append(json.judul);
             $("#peserta").val(json.peserta);
-            
+
             // Set tanggal rapat
             if (json.tgl) {
                 tglPicker.setDate(json.tgl, true, "Y-m-d");
@@ -1045,7 +1128,7 @@ function loadRapat(id, isDetail = false) {
             if (json.tgl_undangan) {
                 tglUndanganPicker.setDate(json.tgl_undangan, true, "Y-m-d");
             }
-            
+
             $("#mulai").val(json.mulai);
             $("#selesai").val(json.selesai);
             $("#tempat").val(json.tempat);
@@ -1153,6 +1236,65 @@ function presensiPegawai(idrapat, id) {
                 width: '100%',
                 dropdownAutoWidth: true
             });
+        }
+    });
+}
+
+function presensiTamu(idrapat, id) {
+    $.post('show_presensi_tamu', {
+        idrapat: idrapat,
+        id: id
+    }, function (response) {
+        var json = jQuery.parseJSON(response);
+        if (json.st == 1) {
+            var tglPresensiPicker;
+
+            tglPresensiPicker = flatpickr("#waktu_tamu", {
+                enableTime: true,          // aktifkan input jam
+                time_24hr: true,
+                dateFormat: "Y-m-d H:i:S", // format yg dikirim ke server
+                altInput: true,
+                disableMobile: true,
+                altFormat: "d F Y H:i:S", // format tampilan
+                locale: {
+                    firstDayOfWeek: 0,
+                    weekdays: {
+                        shorthand: ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'],
+                        longhand: ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
+                    },
+                    months: {
+                        shorthand: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
+                            'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'],
+                        longhand: ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+                            'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'],
+                    },
+                },
+                disable: [
+                    function (date) {
+                        // getDay() -> 0 = Minggu, 6 = Sabtu
+                        return (date.getDay() === 0 || date.getDay() === 6);
+                    }
+                ]
+            });
+
+            $("#id_tamu").val('');
+            $("#judul_tamu").html('');
+            tglPresensiPicker.clear();
+            $("#idrapat_tamu").val('');
+            $('#nama_tamu').val('');
+            $('#jabatan_instansi').val('');
+            $('#no_identitas').val('');
+            $("#waktu_tamu").val('');
+
+            $("#id_tamu").val(json.id);
+            $("#judul_tamu").append(json.judul);
+            if (json.waktu) {
+                tglPresensiPicker.setDate(json.waktu, true, "Y-m-d H:i:s");
+            }
+            $("#idrapat_tamu").val(json.idrapat);
+            $('#nama_tamu').val(json.nama);
+            $('#jabatan_instansi').val(json.instansi);
+            $('#no_identitas').val(json.no);
         }
     });
 }
@@ -1285,4 +1427,23 @@ function previewGambar(url) {
     document.getElementById('previewImage').src = url;
     var previewModal = new bootstrap.Modal(document.getElementById('previewModal'));
     previewModal.show();
+}
+
+// ===== Load QR Tamu =====
+function loadQRTamu(idrapat) {
+    $.ajax({
+        url: 'show_qr_tamu',
+        type: 'POST',
+        data: { id: idrapat },
+        dataType: 'json',
+        success: function (res) {
+            if (res.st === 1) {
+                var html = '<p class="small mb-2">Scan untuk daftar hadir tamu</p>';
+                html += '<img src="' + res.qr_code + '" alt="QR Presensi Tamu" class="img-fluid mb-2" style="max-width:200px;border:1px solid #ddd;border-radius:8px;">';
+                $('#qr-tamu-card').html(html);
+            } else {
+                $('#qr-tamu-card').html('<small>Tidak tersedia</small>');
+            }
+        }
+    });
 }

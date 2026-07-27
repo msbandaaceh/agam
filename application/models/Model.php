@@ -127,14 +127,13 @@ class Model extends CI_Model
 
     public function get_register_rapat()
     {
-        $this->db->select('r.id AS id, r.agenda, r.tanggal, COUNT(p.userid) AS total');
+        $this->db->select('r.id AS id, r.agenda, r.tanggal, ' .
+            '(SELECT COUNT(*) FROM register_presensi_rapat WHERE idrapat = r.id AND hapus = 0) + ' .
+            '(SELECT COUNT(*) FROM presensi_tamu_rapat WHERE idrapat = r.id AND hapus = 0) AS total');
         $this->db->from('register_rapat r');
-        $this->db->join('register_presensi_rapat p', 'r.id = p.idrapat', 'left');
         $this->db->where('r.hapus', '0');
-        $this->db->group_by('r.id');
         $this->db->order_by('r.tanggal', 'DESC');
         $query = $this->db->get();
-
         return $query->result();
     }
 
@@ -147,6 +146,53 @@ class Model extends CI_Model
         $query = $this->db->get($this->db_sso . '.v_users u, register_presensi_rapat p');
 
         return $query->result();
+    }
+
+    /**
+     * Mengembalikan daftar hadir gabungan (pegawai + tamu) untuk dipakai pada tabel detil & PDF.
+     * Field: nip, nama, jabatan, waktu, tipe
+     */
+    public function get_presensi_gabungan($idrapat)
+    {
+        $result = [];
+
+        // Presensi internal (pegawai SSO)
+        $sql_internal = "
+            SELECT
+                p.id AS id_raw,
+                u.nip AS nip,
+                u.fullname AS nama,
+                u.jabatan AS jabatan,
+                TIME(p.created_on) AS waktu,
+                'INTERNAL' AS tipe
+            FROM {$this->db_sso}.v_users u
+            INNER JOIN register_presensi_rapat p ON u.userid = p.userid
+            WHERE p.idrapat = " . (int) $idrapat . "
+              AND p.hapus = '0'
+            ORDER BY p.created_on ASC
+        ";
+        foreach ($this->db->query($sql_internal)->result() as $row) {
+            $result[] = $row;
+        }
+
+        // Presensi tamu (non-SSO)
+        $this->db->select('id AS id_raw, "" AS nip, nama, jabatan_instansi AS jabatan, TIME(waktu_presensi) AS waktu, "TAMU" AS tipe');
+        $this->db->from('presensi_tamu_rapat');
+        $this->db->where('idrapat', $idrapat);
+        $this->db->where('hapus', '0');
+        $this->db->order_by('waktu_presensi', 'ASC');
+        $queryTamu = $this->db->get();
+
+        foreach ($queryTamu->result() as $row) {
+            $result[] = $row;
+        }
+
+        // Urutkan gabungan berdasarkan waktu
+        usort($result, function ($a, $b) {
+            return strcmp((string) $a->waktu, (string) $b->waktu);
+        });
+
+        return $result;
     }
 
     public function proses_simpan_agenda_rapat($data)
@@ -407,6 +453,25 @@ class Model extends CI_Model
             return ['status' => false, 'message' => 'Presensi Gagal Simpan, Silakan Ulangi Lagi'];
     }
 
+    public function proses_simpan_presensi_manual_tamu($data)
+    {
+        if ($data['id'] == -1 || $data['id'] == null) {
+            $data['id'] = null;
+            $query = $this->simpan_data('presensi_tamu_rapat', $data);
+        } else {
+            $cariPresensi = $this->get_seleksi_array('presensi_tamu_rapat', ['id' => $data['id']]);
+            if ($cariPresensi->num_rows() > 0)
+                $query = $this->pembaharuan_data('presensi_tamu_rapat', $data, 'id', $data['id']);
+            else
+                return ['status' => false, 'message' => 'ID Presensi Tidak Ditemukan'];
+        }
+
+        if ($query == 1)
+            return ['status' => true, 'message' => 'Presensi Berhasil Disimpan'];
+        else
+            return ['status' => false, 'message' => 'Presensi Gagal Simpan, Silakan Ulangi Lagi'];
+    }
+
     public function get_rapat_5_menit_sebelum_mulai()
     {
         // Mendapatkan waktu sekarang
@@ -433,4 +498,134 @@ class Model extends CI_Model
         $this->db->order_by('mulai', 'ASC');
         return $this->db->get()->result_array();
     }
+
+    // ==================== Presensi Tamu (Non-SSO) ====================
+
+    /**
+     * Ambil presensi internal saja (pegawai SSO) untuk rapat tertentu.
+     * Digunakan oleh template PDF daftar hadir untuk memisahkan bagian internal & tamu.
+     */
+    public function get_presensi_internal($idrapat)
+    {
+        $this->db->select('p.id AS id, u.nip AS nip, u.fullname AS nama, u.jabatan AS jabatan, TIME(p.created_on) AS waktu');
+        $this->db->from($this->db_sso . '.v_users u');
+        $this->db->join('register_presensi_rapat p', 'u.userid = p.userid');
+        $this->db->where('p.idrapat', (int) $idrapat);
+        $this->db->where('p.hapus', '0');
+        $this->db->order_by('p.created_on', 'ASC');
+        return $this->db->get()->result();
+    }
+
+    public function generate_qr_token($id_rapat)
+    {
+        $token = bin2hex(random_bytes(24));
+
+        $data = [
+            'qr_token' => $token,
+            'modified_on' => date('Y-m-d H:i:s'),
+            'modified_by' => $this->session->userdata('fullname')
+        ];
+
+        $result = $this->pembaharuan_data('register_rapat', $data, 'id', $id_rapat);
+
+        if ($result == 1) {
+            return $token;
+        }
+
+        return false;
+    }
+
+    public function cek_qr_token($token)
+    {
+        $this->db->select('rr.*, rt.nama, rt.no_identitas, rt.jabatan_instansi, rt.waktu_presensi');
+        $this->db->from('register_rapat rr');
+        $this->db->where('rr.qr_token', $token);
+        $this->db->where('rr.hapus', '0');
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function simpan_presensi_tamu($data)
+    {
+        $presensiData = [
+            'idrapat' => $data['idrapat'],
+            'nama' => $data['nama'],
+            'no_identitas' => $data['no_identitas'] ?? null,
+            'jabatan_instansi' => $data['jabatan_instansi'] ?? null,
+            'waktu_presensi' => date('Y-m-d H:i:s'),
+            'created_by' => 'tamu',
+            'created_on' => date('Y-m-d H:i:s')
+        ];
+
+        $this->db->insert('presensi_tamu_rapat', $presensiData);
+        return $this->db->insert_id();
+    }
+
+    public function get_detail_presensi_rapat_lengkap($idrapat)
+    {
+        $combined = [];
+
+        // Presensi internal (pegawai SSO)
+        $this->db->select('p.id AS id, u.nip AS identitas, u.fullname AS nama, u.jabatan AS jabatan_instansi, TIME(p.created_on) AS waktu, "INTERNAL" AS tipe');
+        $this->db->where('u.userid = p.userid AND p.idrapat = "' . $idrapat . '"');
+        $this->db->where('p.hapus', '0');
+        $this->db->order_by('u.id_grup, u.jab_id', 'ASC');
+        $queryInternal = $this->db->get($this->db_sso . '.v_users u, register_presensi_rapat p');
+
+        foreach ($queryInternal->result() as $row) {
+            $combined[] = (object) [
+                'id' => base64_encode($this->encryption->encrypt($row->id)),
+                'idraw' => $row->id,
+                'nama' => $row->nama,
+                'identitas' => $row->identitas,
+                'jabatan_instansi' => $row->jabatan_instansi,
+                'waktu' => $row->waktu,
+                'tipe' => $row->tipe
+            ];
+        }
+
+        // Presensi tamu (non-SSO)
+        $this->db->select('id, nama, no_identitas AS identitas, jabatan_instansi, TIME(waktu_presensi) AS waktu, "TAMU" AS tipe');
+        $this->db->where('idrapat', $idrapat);
+        $this->db->where('hapus', '0');
+        $this->db->order_by('nama', 'ASC');
+        $queryTamu = $this->db->get('presensi_tamu_rapat');
+
+        foreach ($queryTamu->result() as $row) {
+            $combined[] = (object) [
+                'id' => base64_encode($this->encryption->encrypt($row->id)),
+                'idraw' => $row->id,
+                'nama' => $row->nama,
+                'identitas' => $row->identitas,
+                'jabatan_instansi' => $row->jabatan_instansi,
+                'waktu' => $row->waktu,
+                'tipe' => $row->tipe
+            ];
+        }
+
+        // Urutkan berdasarkan waktu
+        usort($combined, function ($a, $b) {
+            return strcmp($a->waktu, $b->waktu);
+        });
+
+        return $combined;
+    }
+
+    public function get_daftar_tamu($idrapat)
+    {
+        $this->db->select('id, nama, no_identitas, jabatan_instansi, TIME(waktu_presensi) AS waktu, "TAMU" AS tipe');
+        $this->db->where('idrapat', $idrapat);
+        $this->db->where('hapus', '0');
+        $this->db->order_by('nama', 'ASC');
+        return $this->db->get('presensi_tamu_rapat')->result();
+    }
+
+    public function get_count_presensi($idrapat)
+    {
+        $internal = $this->db->query("SELECT COUNT(*) as total FROM register_presensi_rapat WHERE idrapat = {$idrapat} AND hapus = 0")->row();
+        $tamu = $this->db->query("SELECT COUNT(*) as total FROM presensi_tamu_rapat WHERE idrapat = {$idrapat} AND hapus = 0")->row();
+
+        return (int) ($internal->total ?? 0) + (int) ($tamu->total ?? 0);
+    }
+
 }
